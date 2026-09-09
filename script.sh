@@ -59,7 +59,7 @@ do
     fi
 done
 
-sudo -u $app_user -i bash -c "cd $docker_files_dir"
+cd $docker_files_dir
 docker compose pull
 docker compose down
 docker compose up -d
