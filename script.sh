@@ -23,7 +23,7 @@ cd $config_checkout_dir
 echo "Copying config files"
 echo $config_files_dir
 if [ -d $config_files_dir ]; then
-    sudo -u $app_user rm -r $config_files_dir
+    sudo -u $app_user -i rm -r $config_files_dir
 fi
 sudo -u $app_user -i mkdir -p $config_files_dir
 sudo -u $app_user -i cp -r $config_checkout_dir/config-files/* $config_files_dir
