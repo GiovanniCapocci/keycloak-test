@@ -2,6 +2,7 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:${KEYCLOAK_VERSION_TAG}
     container_name: keycloak
+    user: "${DOCKER_USER}:${DOCKER_GROUP}"
     restart: always
     init: true
     security_opt:
@@ -53,7 +54,6 @@ services:
       timeout: 5s
     depends_on:
       - postgresql_db_keycloak
-    # command: ["start", "--log=console,file", "--log-file=/tmp/logs/keycloak.log"]
     command: ["start-dev", "--log=console,file", "--log-file=/tmp/logs/keycloak.log", "--http-port", "7080", "--https-port", "8443"]
 
   postgresql_db_keycloak:
