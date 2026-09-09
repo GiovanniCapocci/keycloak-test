@@ -1,0 +1,80 @@
+services:
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:${KEYCLOAK_VERSION_TAG}
+    container_name: keycloak
+    restart: always
+    init: true
+    security_opt:
+      - seccomp:unconfined
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+          cpus: '2'
+        reservations:
+          memory: 512M
+          cpus: '1'
+    memswap_limit: 2048M
+    environment:
+      KC_DB_SCHEMA: public
+      KC_DB: postgres
+      KC_DB_URL_HOST: postgresql_db_keycloak
+      KC_DB_PORT: $POSTGRESQL_DB_KEYCLOAK_PORT
+      KC_DB_URL_DATABASE: $DB_KEYCLOAK_NAME
+      KC_DB_USERNAME: $DB_KEYCLOAK_USERNAME
+      KC_DB_PASSWORD: $DB_KEYCLOAK_PASSWORD
+      KEYCLOAK_ADMIN: $KEYCLOAK_USERNAME
+      KEYCLOAK_ADMIN_PASSWORD: $KEYCLOAK_PASSWORD
+      KC_TRANSACTION_XA_ENABLED: false
+      KC_HEALTH_ENABLED: true
+      KC_METRICS_ENABLED: true
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: true
+      KC_HTTP_ENABLED: false
+      KC_HTTPS_CERTIFICATE_FILE: /tmp/keycloak.crt
+      KC_HTTPS_CERTIFICATE_KEY_FILE: /tmp/keycloak.key
+      KC_LOG_LEVEL: warn
+      JAVA_OPTS_APPEND: "-Djava.net.preferIPv4Stack=true"
+    ports:
+      - "0.0.0.0:$KEYCLOAK_PORT:8443"
+    networks:
+      - keycloak-network
+    volumes:
+      - ${LOGS_PATH}/keycloak:/tmp/logs
+      - ${CERTIFICATES_PATH}/keycloak.crt:/tmp/keycloak.crt:ro
+      - ${CERTIFICATES_PATH}/keycloak.key:/tmp/keycloak.key:ro
+    healthcheck:
+      test: curl -s https://localhost:8443/realms/master >/dev/null; if [[ $$? == 52 ]]; then echo 0; else echo 1; fi
+      start_period: 10s
+      interval: 30s
+      retries: 3
+      timeout: 5s
+    depends_on:
+      - postgresql_db_keycloak
+    # command: ["start", "--log=console,file", "--log-file=/tmp/logs/keycloak.log"]
+    command: ["start-dev", "--http-port", "7080", "--https-port", "8443"]
+
+    postgresql_db_keycloak:
+      image: postgres:${POSTGRES_VERSION_TAG}
+      container_name: postgresql_db_keycloak
+      healthcheck:
+        test: [ "CMD", "pg_isready", "-q", "-U", "$DB_KEYCLOAK_USERNAME" ]
+        interval: 5s
+        timeout: 1s
+        retries: 5
+      restart: always
+      init: true
+      environment:
+        POSTGRES_DB: $DB_KEYCLOAK_NAME
+        POSTGRES_USER: $DB_KEYCLOAK_USERNAME
+        POSTGRES_PASSWORD: $DB_KEYCLOAK_PASSWORD
+      volumes:
+        - ${DATA_BASE_PATH}/postgresql_db_keycloak/data:/var/lib/postgresql/data
+      ports:
+        - "0.0.0.0:$POSTGRESQL_DB_KEYCLOAK_PORT:5432"
+      networks:
+        - keycloak-network
+
+networks:
+  keycloak-network:
+    name: keycloak-network
