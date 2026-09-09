@@ -93,8 +93,7 @@ services:
     memswap_limit: 1024M
     restart: always
     ports:
-      - "0.0.0.0:45103:8081"
-      - "0.0.0.0:45104:8082"
+      - "80:80"
     volumes:
       - ${CONFIG_BASE_PATH}/proxy/config/nginx.conf:/etc/nginx/nginx.conf
       - ${CONFIG_BASE_PATH}/proxy/config/proxy.conf:/etc/nginx/conf.d/default.conf
