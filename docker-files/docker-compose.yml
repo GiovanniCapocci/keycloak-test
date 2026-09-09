@@ -1,8 +1,15 @@
 services:
+
+  fix-log-permissions:
+    image: alpine
+    user: root
+    volumes:
+      - ${LOGS_PATH}/keycloak:/tmp/logs
+    command: sh -c "mkdir -p /tmp/logs && chown -R 1000:1000 /tmp/logs"
+
   keycloak:
     image: quay.io/keycloak/keycloak:${KEYCLOAK_VERSION_TAG}
     container_name: keycloak
-    user: "${DOCKER_USER}:${DOCKER_GROUP}"
     restart: always
     init: true
     security_opt:
@@ -53,7 +60,10 @@ services:
       retries: 3
       timeout: 5s
     depends_on:
-      - postgresql_db_keycloak
+      fix-log-permissions:
+        condition: service_completed_successfully
+      postgresql_db_keycloak:
+        condition: service_healthy
     command: ["start-dev", "--log=console,file", "--log-file=/tmp/logs/keycloak.log", "--http-port", "7080", "--https-port", "8443"]
 
   postgresql_db_keycloak:
