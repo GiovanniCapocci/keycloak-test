@@ -25,8 +25,8 @@ services:
       KC_DB_PASSWORD: $DB_KEYCLOAK_PASSWORD
       KEYCLOAK_ADMIN: $KEYCLOAK_USERNAME
       KEYCLOAK_ADMIN_PASSWORD: $KEYCLOAK_PASSWORD
-      KC_HOSTNAME: http://keycloak.host.test.gr/
-      KC_HOSTNAME_ADMIN: http://keycloak.host.test.gr/
+      KC_HOSTNAME: https://keycloak.host.test.gr/
+      KC_HOSTNAME_ADMIN: https://keycloak.host.test.gr/
       KC_PROXY_HEADERS: xforwarded
       KC_TRANSACTION_XA_ENABLED: false
       KC_HEALTH_ENABLED: true
@@ -38,7 +38,7 @@ services:
       KC_LOG_LEVEL: warn
       JAVA_OPTS_APPEND: "-Djava.net.preferIPv4Stack=true"
     ports:
-      - "0.0.0.0:$KEYCLOAK_PORT:80"
+      - "0.0.0.0:$KEYCLOAK_PORT:8443"
     networks:
       - keycloak-network
     volumes:
@@ -94,6 +94,7 @@ services:
     restart: always
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - ${CONFIG_BASE_PATH}/nginx.conf:/etc/nginx/nginx.conf
       - ${CONFIG_BASE_PATH}/proxy.conf:/etc/nginx/conf.d/default.conf
