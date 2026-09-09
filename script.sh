@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-trap 'echo "Something went wrong ..."; [[ -d "$config_checkout_dir" ]] && echo "Removing $config_checkout_dir" && rm -rf "$config_checkout_dir"' ERR
+# trap 'echo "Something went wrong ..."; [[ -d "$config_checkout_dir" ]] && echo "Removing $config_checkout_dir" && rm -rf "$config_checkout_dir"' ERR
 app_user=dockertestusr
 app_name=keycloak-test
 containers_data_base_path=/srv/containers_data
