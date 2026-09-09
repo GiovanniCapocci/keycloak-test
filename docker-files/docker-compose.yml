@@ -95,8 +95,8 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ${CONFIG_BASE_PATH}/proxy/config/nginx.conf:/etc/nginx/nginx.conf
-      - ${CONFIG_BASE_PATH}/proxy/config/proxy.conf:/etc/nginx/conf.d/default.conf
+      - ${CONFIG_BASE_PATH}/nginx.conf:/etc/nginx/nginx.conf
+      - ${CONFIG_BASE_PATH}/proxy.conf:/etc/nginx/conf.d/default.conf
       - ${CERTIFICATES_PATH}/nginx.crt:/server-certs/nginx.crt
       - ${CERTIFICATES_PATH}/nginx.key:/server-certs/nginx.key
       - ${LOGS_PATH}/proxy:/tmp/logs
