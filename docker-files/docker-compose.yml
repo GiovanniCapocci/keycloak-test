@@ -28,7 +28,7 @@ services:
       KC_TRANSACTION_XA_ENABLED: false
       KC_HEALTH_ENABLED: true
       KC_METRICS_ENABLED: true
-      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: true
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: φαλσε
       KC_HTTP_ENABLED: false
       KC_HTTPS_CERTIFICATE_FILE: /tmp/keycloak.crt
       KC_HTTPS_CERTIFICATE_KEY_FILE: /tmp/keycloak.key

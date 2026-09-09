@@ -41,7 +41,7 @@ sudo -u $app_user openssl req -x509 -newkey rsa:2048 -nodes \
     -out "$certificates_dir/keycloak.crt" \
     -days 825 \
     -subj "/CN=keycloak"
-sudo -u $app_user chmod 600 "$certificates_dir/keycloak.key"
+sudo -u $app_user chmod 644 "$certificates_dir/keycloak.key"
 sudo -u $app_user chmod 644 "$certificates_dir/keycloak.crt"
 
 folders_to_create=(
