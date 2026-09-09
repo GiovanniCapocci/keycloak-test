@@ -3,11 +3,10 @@ set -e
 trap 'echo "Something went wrong ..."; [[ -d "$config_checkout_dir" ]] && echo "Removing $config_checkout_dir" && rm -rf "$config_checkout_dir"' ERR
 app_user=dockertestusr
 app_name=keycloak-test
-containers_data_base_path=/srv/containers-data
+containers_data_base_path=/srv/containers_data
 
 config_checkout_dir=/tmp/$app_name
 docker_files_dir=/home/$app_user/$app_name
-config_files_dir=$containers_data_base_path/$app_name/config-files
 storage_dir=$containers_data_base_path/$app_name/data
 logs_dir=$containers_data_base_path/$app_name/logs
 certificates_dir=$containers_data_base_path/$app_name/certificates
@@ -16,7 +15,7 @@ repo_url=https://github.com/GiovanniCapocci/keycloak-test.git
 
 sudo -u $app_user rm -rf $config_checkout_dir
 
-echo "git login"
+echo "git clone"
 git clone $repo_url $config_checkout_dir
 cd $config_checkout_dir
 
@@ -29,14 +28,6 @@ fi
 sudo -u $app_user -i mkdir -p $docker_files_dir
 sudo -u $app_user -i cp -r $config_checkout_dir/docker-files/* $docker_files_dir
 sudo -u $app_user -i cp -r $config_checkout_dir/docker-files/.env $docker_files_dir
-
-echo "Copying config files"
-echo $config_files_dir
-if [ -d $config_files_dir ]; then
-     sudo rm -r $config_files_dir
-fi
-sudo -u $app_user -i mkdir $config_files_dir
-sudo -u $app_user -i cp -r $config_checkout_dir/config-files/* $config_files_dir
 
 echo "Creating certificates"
 echo $certificates_dir
@@ -68,7 +59,7 @@ do
     fi
 done
 
-cd $docker_files_dir
+sudo -u $app_user -i bash -c "cd $docker_files_dir"
 docker compose pull
 docker compose down
 docker compose up -d
