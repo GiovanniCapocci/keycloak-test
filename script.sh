@@ -11,6 +11,7 @@ docker_files_dir=/home/$app_user/$app_name
 storage_dir=$containers_data_base_path/$app_name/data
 logs_dir=$containers_data_base_path/$app_name/logs
 certificates_dir=$containers_data_base_path/$app_name/certificates
+secrets_dir=/home/$app_user/secrets
 
 repo_url=https://github.com/GiovanniCapocci/keycloak-test.git
 
@@ -19,6 +20,26 @@ sudo -u $app_user rm -rf $config_checkout_dir
 echo "git clone"
 git clone $repo_url $config_checkout_dir
 cd $config_checkout_dir
+
+
+function apply_secrets() {
+    echo using $1 targeting $2
+    grep -v '^#' "$1" | while IFS=: read -r f1 f2
+    do
+        if [ -n "$f1" ]; then
+            sed -i "s:$f1:$f2:g" $2
+        fi
+    done
+}
+
+apply_secrets $secrets_dir/env.secrets $config_checkout_dir/docker-files/.env
+perl -p -i -e "s/\r//g" $config_checkout_dir/docker-files/.env
+
+if grep -q '{{.*}}' "$2"; then
+    echo "ERROR: unresolved placeholder(s) left in $2" >&2
+    grep -n '{{.*}}' "$2"
+    exit 1
+fi
 
 echo "Copying config files"
 echo $config_files_dir
