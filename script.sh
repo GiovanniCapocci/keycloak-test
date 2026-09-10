@@ -1,7 +1,6 @@
 #!/bin/bash
 set -e
 trap 'echo "Something went wrong ..."; [[ -d "$config_checkout_dir" ]] && echo "Removing $config_checkout_dir" && rm -rf "$config_checkout_dir"' ERR
-read username
 app_user=dockertestusr
 app_name=keycloak-test
 containers_data_base_path=/srv/containers_data
@@ -90,7 +89,8 @@ do
     fi
 done
 
-docker login ghcr.io -u $username
+username=$(cat "$secrets_dir/username.txt")
+docker login ghcr.io -u "$username" --password-stdin < "$secrets_dir/pat.txt"
 cd $docker_files_dir
 docker compose pull
 docker compose down
