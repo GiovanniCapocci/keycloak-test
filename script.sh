@@ -72,7 +72,7 @@ sudo -u $app_user -i cp -r $secrets_dir/nginx.* $certificates_dir
 sudo -u $app_user -i cp -r $secrets_dir/keycloak.* $certificates_dir
 
 sudo -u $app_user chmod 644 "$certificates_dir/nginx.crt" "$certificates_dir/keycloak.crt"
-sudo -u $app_user chmod 600 "$certificates_dir/nginx.key" "$certificates_dir/keycloak.key"
+sudo -u $app_user chmod 644 "$certificates_dir/nginx.key" "$certificates_dir/keycloak.key"
 
 folders_to_create=(
     $storage_dir
