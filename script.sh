@@ -71,18 +71,8 @@ echo "Copying certificates"
 sudo -u $app_user -i cp -r $secrets_dir/nginx.* $certificates_dir
 sudo -u $app_user -i cp -r $secrets_dir/keycloak.* $certificates_dir
 
-# sudo -u $app_user chmod 644 "$certificates_dir/keycloak.key"
-# sudo -u $app_user chmod 644 "$certificates_dir/keycloak.crt"
-
-echo "Generating a new self-signed certificate for nginx"
-sudo -u $app_user openssl req -x509 -newkey rsa:2048 -nodes \
-    -keyout "$certificates_dir/nginx.key" \
-    -out "$certificates_dir/nginx.crt" \
-    -days 825 \
-    -subj "/CN=keycloak.host.test.gr" \
-    -addext "subjectAltName=DNS:keycloak.host.test.gr"
-# sudo -u $app_user chmod 644 "$certificates_dir/nginx.key"
-# sudo -u $app_user chmod 644 "$certificates_dir/nginx.crt"
+sudo -u $app_user chmod 644 "$certificates_dir/nginx.crt" "$certificates_dir/keycloak.crt"
+sudo -u $app_user chmod 600 "$certificates_dir/nginx.key" "$certificates_dir/keycloak.key"
 
 folders_to_create=(
     $storage_dir
