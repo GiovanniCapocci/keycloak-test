@@ -67,7 +67,7 @@ services:
     command: ["start-dev", "--log=console,file", "--log-file=/tmp/logs/keycloak.log", "--http-port", "7080", "--https-port", "8443"]
 
   postgresql_db_keycloak:
-    image: postgres:${POSTGRES_VERSION_TAG}
+    image: ghcr.io/giovannicapocci/custom-postgresql:${POSTGRES_VERSION_TAG}
     container_name: postgresql_db_keycloak
     healthcheck:
       test: [ "CMD", "pg_isready", "-q", "-U", "$DB_KEYCLOAK_USERNAME" ]

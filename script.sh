@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
 trap 'echo "Something went wrong ..."; [[ -d "$config_checkout_dir" ]] && echo "Removing $config_checkout_dir" && rm -rf "$config_checkout_dir"' ERR
+read username
 app_user=dockertestusr
 app_name=keycloak-test
 containers_data_base_path=/srv/containers_data
@@ -59,20 +60,19 @@ sudo -u $app_user -i mkdir -p $docker_files_dir
 sudo -u $app_user -i cp -r $config_checkout_dir/docker-files/* $docker_files_dir
 sudo -u $app_user -i cp -r $config_checkout_dir/docker-files/.env $docker_files_dir
 
-echo "Creating certificates"
+echo "Creating certificates directory"
 echo $certificates_dir
 if [ -d $certificates_dir ]; then
     sudo -u $app_user rm -r $certificates_dir
 fi
 sudo -u $app_user -i mkdir $certificates_dir
-echo "Generating a new self-signed certificate for Keycloak"
-sudo -u $app_user openssl req -x509 -newkey rsa:2048 -nodes \
-    -keyout "$certificates_dir/keycloak.key" \
-    -out "$certificates_dir/keycloak.crt" \
-    -days 825 \
-    -subj "/CN=keycloak"
-sudo -u $app_user chmod 644 "$certificates_dir/keycloak.key"
-sudo -u $app_user chmod 644 "$certificates_dir/keycloak.crt"
+
+echo "Copying certificates"
+sudo -u $app_user -i cp -r $secrets_dir/nginx.* $certificates_dir
+sudo -u $app_user -i cp -r $secrets_dir/keycloak.* $certificates_dir
+
+# sudo -u $app_user chmod 644 "$certificates_dir/keycloak.key"
+# sudo -u $app_user chmod 644 "$certificates_dir/keycloak.crt"
 
 echo "Generating a new self-signed certificate for nginx"
 sudo -u $app_user openssl req -x509 -newkey rsa:2048 -nodes \
@@ -81,8 +81,8 @@ sudo -u $app_user openssl req -x509 -newkey rsa:2048 -nodes \
     -days 825 \
     -subj "/CN=keycloak.host.test.gr" \
     -addext "subjectAltName=DNS:keycloak.host.test.gr"
-sudo -u $app_user chmod 644 "$certificates_dir/nginx.key"
-sudo -u $app_user chmod 644 "$certificates_dir/nginx.crt"
+# sudo -u $app_user chmod 644 "$certificates_dir/nginx.key"
+# sudo -u $app_user chmod 644 "$certificates_dir/nginx.crt"
 
 folders_to_create=(
     $storage_dir
@@ -100,10 +100,13 @@ do
     fi
 done
 
+docker login ghcr.io -u $username
 cd $docker_files_dir
 docker compose pull
 docker compose down
 docker compose up -d
+docker logout ghcr.io
 
 git credential-cache exit
 sudo rm -rf $config_checkout_dir
+exit
