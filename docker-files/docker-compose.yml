@@ -53,6 +53,7 @@ services:
       - ${LOGS_PATH}/keycloak:/tmp/logs
       - ${CERTIFICATES_PATH}/keycloak.crt:/tmp/keycloak.crt:ro
       - ${CERTIFICATES_PATH}/keycloak.key:/tmp/keycloak.key:ro
+      - vault-secrets:/vault-secrets
     healthcheck:
       test: curl -s https://localhost:8443/realms/master >/dev/null; if [[ $$? == 52 ]]; then echo 0; else echo 1; fi
       start_period: 10s
@@ -60,6 +61,8 @@ services:
       retries: 3
       timeout: 5s
     depends_on:
+      vault-agent:
+        condition: service_completed_successfully
       fix-log-permissions:
         condition: service_completed_successfully
       postgresql_db_keycloak:
@@ -76,16 +79,20 @@ services:
       retries: 5
     restart: always
     init: true
+    env_file:
+      - vault-secrets/secrets.env
     environment:
       POSTGRES_DB: $DB_KEYCLOAK_NAME
-      POSTGRES_USER: $DB_KEYCLOAK_USERNAME
-      POSTGRES_PASSWORD: $DB_KEYCLOAK_PASSWORD
     volumes:
       - ${DATA_BASE_PATH}/postgresql_db_keycloak/data:/var/lib/postgresql/data
+      - vault-secrets:/vault-secrets
     ports:
       - "0.0.0.0:$POSTGRESQL_DB_KEYCLOAK_PORT:5432"
     networks:
       - keycloak-network
+    depends_on:
+      vault-agent:
+        condition: service_completed_successfully
 
   reverse-proxy:
     container_name: reverse-proxy
@@ -121,11 +128,37 @@ services:
     restart: always
     ports:
       - "0.0.0.0:$VAULT_PORT:8200"
+    volumes:
+      - ${CONFIG_BASE_PATH}/vault-config.hcl:/vault/config/vault.hcl:ro
+      - ${DATA_BASE_PATH}/vault/data:/vault/file
+    command: server -config=/vault/config/vault.hcl
+    networks:
+      - keycloak-network
+    healthcheck:
+      test: ["CMD", "vault", "status"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  vault-agent:
+    image: hashicorp/vault:${VAULT_VERSION_TAG}
+    container_name: vault-agent
+    restart: "no"
+    volumes:
+      - ${CONFIG_BASE_PATH}/vault-agent-config.hcl:/etc/vault/agent.hcl:ro
+      - vault-secrets:/env
     environment:
-      VAULT_DEV_ROOT_TOKEN_ID: ${VAULT_DEV_ROOT_TOKEN_ID}
+      VAULT_ADDR: "http://vault:8200"
+    command: agent -config=/etc/vault/agent.hcl -once
+    depends_on:
+      vault:
+        condition: service_healthy
     networks:
       - keycloak-network
 
 networks:
   keycloak-network:
     name: keycloak-network
+
+volumes:
+  vault-secrets:
