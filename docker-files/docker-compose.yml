@@ -134,11 +134,11 @@ services:
     command: server -config=/vault/config/vault.hcl
     networks:
       - keycloak-network
-    healthcheck:
-      test: ["CMD", "vault", "status"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
+    # healthcheck:
+    #   test: ["CMD", "vault", "status"]
+    #   interval: 5s
+    #   timeout: 3s
+    #   retries: 5
 
   vault-agent:
     image: hashicorp/vault:${VAULT_VERSION_TAG}
