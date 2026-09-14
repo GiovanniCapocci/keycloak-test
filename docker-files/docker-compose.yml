@@ -120,7 +120,7 @@ services:
     image: hashicorp/vault:${VAULT_VERSION_TAG}
     restart: always
     ports:
-      - "8200:8200"
+      - "0.0.0.0:$VAULT_PORT:8200"
     environment:
       VAULT_DEV_ROOT_TOKEN_ID: ${VAULT_DEV_ROOT_TOKEN_ID}
     networks:
