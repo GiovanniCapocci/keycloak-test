@@ -114,6 +114,18 @@ services:
     networks:
       - keycloak-network
 
+  vault:
+    container_name: vault
+    init: true
+    image: vault:${VAULT_VERSION_TAG}
+    restart: always
+    ports:
+      - "8200:8200"
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: ${VAULT_DEV_ROOT_TOKEN_ID}
+    networks:
+      - keycloak-network
+
 networks:
   keycloak-network:
     name: keycloak-network
