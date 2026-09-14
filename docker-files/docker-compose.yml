@@ -135,7 +135,7 @@ services:
     networks:
       - keycloak-network
     healthcheck:
-      test: ["CMD-SHELL", "vault status -tls-skip-verify || [ $$? -eq 2 ]"]
+      test: ["CMD-SHELL", "vault status; [ $$? -eq 0 ] || [ $$? -eq 2 ]"]
       interval: 5s
       timeout: 3s
       retries: 5
