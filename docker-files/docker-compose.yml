@@ -131,7 +131,7 @@ services:
     volumes:
       - ${CONFIG_BASE_PATH}/vault-config.hcl:/vault/config/vault.hcl:ro
       - ${DATA_BASE_PATH}/vault/data:/vault/file
-    command: server -config=/vault/config/vault.hcl
+    entrypoint: ["vault", "server", "-config=/vault/config/vault.hcl"]
     networks:
       - keycloak-network
     healthcheck:
