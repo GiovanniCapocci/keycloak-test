@@ -67,11 +67,13 @@ fi
 sudo -u $app_user -i mkdir $certificates_dir
 
 echo "Copying certificates"
-sudo -u $app_user -i cp -r $secrets_dir/nginx.* $certificates_dir
-sudo -u $app_user -i cp -r $secrets_dir/keycloak.* $certificates_dir
+sudo -u $app_user cp -r $secrets_dir/nginx.* $certificates_dir
+sudo -u $app_user cp -r $secrets_dir/keycloak.* $certificates_dir
 
 sudo -u $app_user chmod 644 "$certificates_dir/nginx.crt" "$certificates_dir/keycloak.crt"
-sudo -u $app_user chmod 644 "$certificates_dir/nginx.key" "$certificates_dir/keycloak.key"
+sudo -u $app_user chmod 600 "$certificates_dir/nginx.key" "$certificates_dir/keycloak.key"
+
+sudo chown 1000:1000 "$certificates_dir/keycloak.crt" "$certificates_dir/keycloak.key"
 
 folders_to_create=(
     $storage_dir
@@ -88,6 +90,8 @@ do
         sudo -u $app_user -i mkdir -p $path
     fi
 done
+
+sudo chown -R 1000:1000 $logs_dir/keycloak
 
 username=$(cat "$secrets_dir/username.txt")
 docker login ghcr.io -u "$username" --password-stdin < "$secrets_dir/pat.txt"
